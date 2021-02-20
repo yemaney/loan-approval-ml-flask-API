@@ -25,6 +25,10 @@ model = pickle.load( open( "model.p", "rb" ) )
 
 @app.route('/result', methods=['POST'])
 def result():
+    """Takes in the inforation sumbmitted in the form.html file as an input.
+    Then transforms those inputs into a dataframe that can be fed to the model
+    predictor.
+    """
     Gender = request.form.get("var_1", type=str)
     Married = request.form.get("var_2", type=str)
     Dependents = request.form.get("var_3", type=str)
@@ -46,33 +50,13 @@ def result():
     
     df = pd.DataFrame(entry.values(), index=entry.keys()).transpose()
     # getting predictions from our model.
-        # it is much simpler because we used pipelines during development
     res = model.predict(df)
-        # we cannot send numpt array as a result
     
     if res.tolist() == ['Y']:
         entry = 'Approved'
     else:
         entry = 'Denied'
-#     entry = res.tolist() 
     return render_template('result.html', entry=entry)
-
-# 'Based on the information provided, we believe you are eligible for the loan'
-# 'Unfortunately you may not be eligible for a loan'
-
-# class Scoring(Resource):
-#     def post(self):
-#         json_data = request.get_json()
-#         df = pd.DataFrame(json_data.values(), index=json_data.keys()).transpose()
-#         # getting predictions from our model.
-#         # it is much simpler because we used pipelines during development
-#         res = model.predict(df)
-#         # we cannot send numpt array as a result
-#         return res.tolist() 
-
-
-# # assign endpoint
-# api.add_resource(Scoring, '/scoring')
 
 if __name__ == '__main__':
     app.run( debug=True)
