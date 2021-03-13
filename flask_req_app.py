@@ -1,16 +1,7 @@
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-
-# import Flask and jsonify
-from flask import Flask, jsonify, request
-# import Resource, Api and reqparser
-from flask_restful import Resource, Api, reqparse
+# imports
+from flask import Flask, request
+from flask_restful import Resource, Api
 import pandas as pd
-import numpy
 import pickle
 
 app = Flask(__name__)

@@ -1,16 +1,7 @@
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
-
-# import Flask and jsonify
-from flask import Flask, jsonify, request, render_template
-# import Resource, Api and reqparser
-from flask_restful import Resource, Api, reqparse
+# imports
+from flask import Flask, request, render_template
+from flask_restful import Api
 import pandas as pd
-import numpy
 import pickle
 
 app = Flask(__name__)
@@ -29,6 +20,7 @@ def result():
     Then transforms those inputs into a dataframe that can be fed to the model
     predictor.
     """
+    # collect values that were entered on the form html page
     Gender = request.form.get("var_1", type=str)
     Married = request.form.get("var_2", type=str)
     Dependents = request.form.get("var_3", type=str)
@@ -41,6 +33,7 @@ def result():
     Credit_History = request.form.get("var_10", type=int)
     Property_Area = request.form.get("var_11", type=str)
     
+    # create a dictionary from all the values collected
     entry = dict(Gender=Gender,Married=Married,Dependents=Dependents,
                 Education=Education,Self_Employed=Self_Employed,
                 ApplicantIncome=ApplicantIncome,CoapplicantIncome=CoapplicantIncome,
@@ -48,10 +41,13 @@ def result():
                 Credit_History=Credit_History,
                 Property_Area=Property_Area)
     
+    # turn dictionary into a datframe
     df = pd.DataFrame(entry.values(), index=entry.keys()).transpose()
+    
     # getting predictions from our model.
     res = model.predict(df)
     
+    # make output verbose depending on machine prediction
     if res.tolist() == ['Y']:
         entry = 'Approved'
     else:
