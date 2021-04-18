@@ -4,6 +4,9 @@ from flask_restful import Api
 import pandas as pd
 import pickle
 
+model = pickle.load( open( "model.p", "rb" ) )
+preprocess = pickle.load( open( "preprocess.p", "rb" ) )
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -12,7 +15,6 @@ api = Api(app)
 def welcome():
     return render_template('form.html')
 
-model = pickle.load( open( "model.p", "rb" ) )
 
 @app.route('/result', methods=['POST'])
 def result():
@@ -43,12 +45,12 @@ def result():
     
     # turn dictionary into a datframe
     df = pd.DataFrame(entry.values(), index=entry.keys()).transpose()
-    
+    data = preprocess.transform(df) # preprocess dataframe 
     # getting predictions from our model.
-    res = model.predict(df)
+    res = model.predict(data).tolist()[0] # get the models predictions
     
     # make output verbose depending on machine prediction
-    if res.tolist() == ['Y']:
+    if res == 1:
         entry = 'Approved'
     else:
         entry = 'Denied'
