@@ -7,30 +7,37 @@ import pickle
 app = Flask(__name__)
 api = Api(app)
 
-
+# importing pickle files created an saved in the modeling notebook.
 model = pickle.load( open( "model.p", "rb" ) )
+preprocess = pickle.load( open( "preprocess.p", "rb" ) )
 
 
-class Scoring(Resource):
+class Prediction(Resource):
     def post(self):
-        """Function takes in a json format api request as data.
-        the data must be formatted in the correct order illustrated in the notebook.
+        """Takes json format input of a user profile. Uses [model] to predict
+        if a person qualifies for a loan.
 
         Returns:
-            list: list will have a single entry, either a 'Y' or 'N', depending on the 
-            models predictions
+            [string]: [short string detailing if the persons profile is expected to be approved for a loan]
         """
-        json_data = request.get_json()
-        df = pd.DataFrame(json_data.values(), index=json_data.keys()).transpose()
-        # getting predictions from our model.
-        # it is much simpler because we used pipelines during development
-        res = model.predict(df)
-        # we cannot send numpt array as a result
-        return res.tolist() 
+
+        json_data = request.get_json() # gets the data 
+        df = pd.DataFrame(json_data.values(), index=json_data.keys()).transpose() # convert data into a dataframe
+        data = preprocess.transform(df) # preprocess dataframe 
+
+        res = model.predict(data).tolist()[0] # get the models predictions
+        
+        
+        if res == 1:
+            string = 'You may be eligible for a loan'
+        else:
+            string = 'You are probably not eligible for a loan'
+        
+        return string 
 
 
 # assign endpoint
-api.add_resource(Scoring, '/scoring')
+api.add_resource(Prediction, '/Prediction')
 
 if __name__ == '__main__':
     app.run(debug=True)
